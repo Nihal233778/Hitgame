@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,6 +6,8 @@
     <title>Adsonar · Hen & Egg · Right Scoreboard</title>
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <!-- Adexora ad SDK integration -->
+    <script src="https://adexora.com/cdn/ads.js?id=2043"></script>
     <style>
         * {
             margin: 0;
@@ -23,7 +25,6 @@
             overflow-x: hidden;
         }
 
-        /* main container uses flex row for right-side scoreboard */
         .game-layout {
             max-width: 800px;
             margin: 0 auto;
@@ -33,7 +34,6 @@
             align-items: stretch;
         }
 
-        /* left side: hen & actions area */
         .farm-area {
             flex: 2;
             min-width: 260px;
@@ -45,7 +45,6 @@
             border: 1px solid #ffdeae;
         }
 
-        /* right side: vertical scoreboard */
         .scoreboard-right {
             flex: 1;
             min-width: 150px;
@@ -94,7 +93,6 @@
             color: transparent;
         }
 
-        /* hen character */
         .hen-center {
             display: flex;
             justify-content: center;
@@ -177,7 +175,6 @@
             box-shadow: 0 1px 0 #b45a1a;
         }
 
-        /* review panel (hidden initially) */
         .review-panel {
             margin-top: 24px;
             background: #fff7ed;
@@ -233,7 +230,6 @@
             display: none;
         }
 
-        /* floating egg animation */
         .fly-egg {
             position: fixed;
             pointer-events: none;
@@ -367,18 +363,28 @@
     let reviewSubmitted = false;
     let selectedRating = 0;
 
-    // Load highscore from localStorage
+    // ---------- AD INTEGRATION (Adexora / OnClicka) ----------
+    // Immediately try to show an ad on game load (optional, but non-blocking)
+    (function showInitialAd() {
+        if (typeof window.showAdexora === 'function') {
+            window.showAdexora()
+                .then(() => {
+                    console.log('Ad shown successfully (initial).');
+                })
+                .catch(e => {
+                    console.warn('Ad error (initial):', e);
+                });
+        } else {
+            console.warn('showAdexora not available yet.');
+        }
+    })();
+
+    // ---------- load highscore from localStorage
     try {
         const saved = localStorage.getItem('adsonarEggRightHigh');
         if (saved && !isNaN(parseInt(saved))) highScore = parseInt(saved);
         highScoreSpan.innerText = highScore;
     } catch(e) {}
-
-    // Telegram user info (optional)
-    if (tg.initDataUnsafe?.user) {
-        const firstName = tg.initDataUnsafe.user.first_name || 'Farmer';
-        // not displayed but could be used, no need to show extra
-    }
 
     // Helper: update UI on scoreboard
     function updateUI() {
@@ -509,6 +515,17 @@
         document.querySelectorAll('.star').forEach(star => star.style.pointerEvents = 'auto');
         reviewComment.disabled = false;
         tg.HapticFeedback?.notificationOccurred('warning');
+
+        // ---------- AD HOOK: show ad after game ends (reward moment) ----------
+        if (typeof window.showAdexora === 'function') {
+            window.showAdexora()
+                .then(() => {
+                    console.log('Ad shown after game end.');
+                })
+                .catch(e => {
+                    console.warn('Post-game ad error:', e);
+                });
+        }
     }
 
     // Start new game
@@ -614,6 +631,17 @@
         document.querySelectorAll('.star').forEach(star => star.style.pointerEvents = 'none');
         reviewComment.disabled = true;
         tg.HapticFeedback?.notificationOccurred('success');
+
+        // ---------- AD HOOK: also show ad after review (extra engagement) ----------
+        if (typeof window.showAdexora === 'function') {
+            window.showAdexora()
+                .then(() => {
+                    console.log('Ad shown after review submission.');
+                })
+                .catch(e => {
+                    console.warn('Post-review ad error:', e);
+                });
+        }
     }
 
     // Event listeners
@@ -641,7 +669,7 @@
     // initial state
     fullReset();
     bindStars();
-    console.log("Adsonar Hen Game — Right scoreboard pattern active");
+    console.log("Adsonar Hen Game — Right scoreboard pattern active with Adexora ads");
 </script>
 </body>
-</html>
+</html>    .            
