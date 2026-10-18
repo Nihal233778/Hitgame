@@ -1,4 +1,4 @@
-                                            <!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +6,7 @@
     <title>Adsonar · Hen & Egg · Right Scoreboard</title>
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
-    <!-- Adexora ad SDK integration -->
+    <!-- ✅ Adexora ad SDK — app id 2043 -->
     <script src="https://adexora.com/cdn/ads.js?id=2043"></script>
     <style>
         * {
@@ -170,9 +170,17 @@
             color: #6f441e;
             box-shadow: 0 4px 0 #c9a16b;
         }
-        .btn-primary:active, .btn-secondary:active {
+        .btn-reward {
+            background: linear-gradient(105deg, #7bbf6a, #4f9d3f);
+            color: #fff;
+            box-shadow: 0 4px 0 #2f6b24;
+        }
+        .btn-primary:active, .btn-secondary:active, .btn-reward:active {
             transform: translateY(2px);
             box-shadow: 0 1px 0 #b45a1a;
+        }
+        .btn-reward:disabled {
+            cursor: progress;
         }
 
         .review-panel {
@@ -286,6 +294,10 @@
             <button class="btn btn-primary" id="startGameBtn">🌾 START</button>
             <button class="btn btn-secondary" id="resetGameBtn">🔄 RESET</button>
         </div>
+        <!-- 🎁 Rewarded ad button (only during an active game) -->
+        <div class="action-buttons hidden" id="rewardAdRow">
+            <button class="btn btn-reward" id="rewardAdBtn">🎁 WATCH AD · +5 🥚</button>
+        </div>
         <div class="action-buttons hidden" id="playAgainContainer">
             <button class="btn btn-primary" id="playAgainBtn">🐣 PLAY AGAIN</button>
         </div>
@@ -328,10 +340,12 @@
 </div>
 
 <script>
-    // ---------- TELEGRAM WEB APP INIT ----------
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.ready();
+    // ---------- TELEGRAM WEB APP INIT (safe fallback outside Telegram) ----------
+    const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : {
+        expand() {}, ready() {}, sendData() {}, initDataUnsafe: {}
+    };
+    tg.expand?.();
+    tg.ready?.();
     document.body.style.backgroundColor = "#fef3da";
 
     // DOM elements
@@ -343,6 +357,8 @@
     const basketMsg = document.getElementById('basketMessage');
     const startBtn = document.getElementById('startGameBtn');
     const resetBtn = document.getElementById('resetGameBtn');
+    const rewardAdRow = document.getElementById('rewardAdRow');
+    const rewardAdBtn = document.getElementById('rewardAdBtn');
     const playAgainContainer = document.getElementById('playAgainContainer');
     const playAgainBtn = document.getElementById('playAgainBtn');
     const reviewPanel = document.getElementById('reviewPanel');
@@ -362,29 +378,115 @@
     let comboTimer = null;
     let reviewSubmitted = false;
     let selectedRating = 0;
+    let gameSession = 0;     // incremented every new game / reset
+    let adInProgress = false;
 
-    // ---------- AD INTEGRATION (Adexora / OnClicka) ----------
-    // Immediately try to show an ad on game load (optional, but non-blocking)
-    (function showInitialAd() {
-        if (typeof window.showAdexora === 'function') {
-            window.showAdexora()
-                .then(() => {
-                    console.log('Ad shown successfully (initial).');
-                })
-                .catch(e => {
-                    console.warn('Ad error (initial):', e);
-                });
-        } else {
-            console.warn('showAdexora not available yet.');
+    // ============================================================
+    //  ✅ ADEXORA AD INTEGRATION  (app id = 2043)
+    // ============================================================
+    const ADEXORA_APP_ID = 2043;
+
+    /**
+     * Waits for the Adexora SDK to be ready, then shows an ad.
+     * Resolves when the ad was completed, rejects on error / timeout.
+     */
+    function showAdexoraAd({ timeoutMs = 6000 } = {}) {
+        return new Promise((resolve, reject) => {
+            const startedAt = Date.now();
+
+            const tryShow = () => {
+                if (typeof window.showAdexora === 'function') {
+                    window.showAdexora()
+                        .then(() => resolve(true))
+                        .catch((err) => reject(err));
+                    return;
+                }
+                if (Date.now() - startedAt < timeoutMs) {
+                    setTimeout(tryShow, 200);
+                } else {
+                    reject(new Error('Adexora SDK not available (timeout)'));
+                }
+            };
+
+            tryShow();
+        });
+    }
+
+    /**
+     * Grants bonus eggs as the reward for watching an ad.
+     * Updates score, high-score and the relevant message.
+     */
+    function applyBonusEggs(amount, expectedSession) {
+        // If the game session changed (user restarted), don't grant stale reward.
+        if (expectedSession !== undefined && expectedSession !== gameSession) return;
+
+        currentScore += amount;
+
+        if (currentScore > highScore) {
+            highScore = currentScore;
+            try { localStorage.setItem('adsonarEggRightHigh', highScore); } catch (e) {}
         }
+        highScoreSpan.innerText = highScore;
+        updateUI();
+
+        if (!gameActive) {
+            finalScoreInfo.innerText = `🎁 Ad reward: +${amount} bonus eggs! Final score: ${currentScore} eggs.`;
+        } else {
+            basketMsg.innerText = `🎁 +${amount} bonus eggs from ad!`;
+            setTimeout(() => {
+                if (gameActive) basketMsg.innerText = "🧺 Tap the hen for more eggs!";
+            }, 1600);
+        }
+
+        tg.HapticFeedback?.notificationOccurred?.('success');
+        console.log(`Ad completed! Reward granted: +${amount} eggs.`);
+    }
+
+    // ---------- 1) Initial (warm-up) ad on page load — no reward ----------
+    (function showInitialAd() {
+        showAdexoraAd()
+            .then(() => console.log('Adexora ad shown successfully (initial).'))
+            .catch((e) => console.warn('Adexora initial ad error:', e));
     })();
 
-    // ---------- load highscore from localStorage
+    // ---------- 2) Rewarded ad button (during gameplay) ----------
+    rewardAdBtn.addEventListener('click', async () => {
+        if (!gameActive || adInProgress) return;
+        adInProgress = true;
+
+        const sessionAtClick = gameSession;
+        rewardAdBtn.disabled = true;
+        rewardAdBtn.style.opacity = '0.6';
+        rewardAdBtn.innerText = '⏳ LOADING AD...';
+
+        try {
+            await showAdexoraAd();
+            // ✅ Grant reward only if the same game is still running
+            if (sessionAtClick === gameSession && gameActive) {
+                applyBonusEggs(5, sessionAtClick);
+            } else {
+                console.log('Ad completed but game state changed — reward skipped.');
+            }
+        } catch (e) {
+            console.warn('Rewarded ad failed:', e);
+            basketMsg.innerText = '⚠️ Ad not available right now. Try again!';
+            setTimeout(() => {
+                if (gameActive) basketMsg.innerText = '🧺 Tap the hen for eggs!';
+            }, 2000);
+        } finally {
+            adInProgress = false;
+            rewardAdBtn.disabled = false;
+            rewardAdBtn.style.opacity = '1';
+            rewardAdBtn.innerText = '🎁 WATCH AD · +5 🥚';
+        }
+    });
+
+    // ---------- load highscore from localStorage ----------
     try {
         const saved = localStorage.getItem('adsonarEggRightHigh');
         if (saved && !isNaN(parseInt(saved))) highScore = parseInt(saved);
         highScoreSpan.innerText = highScore;
-    } catch(e) {}
+    } catch (e) {}
 
     // Helper: update UI on scoreboard
     function updateUI() {
@@ -404,7 +506,7 @@
             if (gameActive && currentCombo !== 0) {
                 currentCombo = 0;
                 updateUI();
-                tg.HapticFeedback?.impactOccurred('soft');
+                tg.HapticFeedback?.impactOccurred?.('soft');
                 basketMsg.innerText = "🌀 Combo lost! Tap again to build streak.";
                 setTimeout(() => {
                     if (gameActive) basketMsg.innerText = "🧺 Tap the hen for eggs!";
@@ -434,36 +536,32 @@
     function layEgg(event) {
         if (!gameActive) return;
 
-        // increment
         currentScore++;
         currentCombo++;
         updateUI();
 
-        // high score update
         if (currentScore > highScore) {
             highScore = currentScore;
             highScoreSpan.innerText = highScore;
-            localStorage.setItem('adsonarEggRightHigh', highScore);
-            tg.HapticFeedback?.impactOccurred('light');
+            try { localStorage.setItem('adsonarEggRightHigh', highScore); } catch (e) {}
+            tg.HapticFeedback?.impactOccurred?.('light');
         }
 
         resetComboTimer();
-        tg.HapticFeedback?.impactOccurred('medium');
+        tg.HapticFeedback?.impactOccurred?.('medium');
         shakeHen();
 
-        // get coordinates for egg animation
         let clientX, clientY;
-        if (event.touches) {
+        if (event && event.touches && event.touches[0]) {
             clientX = event.touches[0].clientX;
             clientY = event.touches[0].clientY;
-        } else {
+        } else if (event) {
             clientX = event.clientX;
             clientY = event.clientY;
         }
         if (clientX && clientY) createFloatingEgg(clientX, clientY);
-        else createFloatingEgg(window.innerWidth/2, window.innerHeight/2 - 50);
+        else createFloatingEgg(window.innerWidth / 2, window.innerHeight / 2 - 50);
 
-        // update basket message for combo fun
         if (currentCombo === 3) basketMsg.innerText = "🔥 EGGSTRA! +3 streak!";
         else if (currentCombo === 7) basketMsg.innerText = "⭐ SUPER HEN! Keep going!";
         else basketMsg.innerText = `🥚 +1 egg! Total: ${currentScore}`;
@@ -498,13 +596,12 @@
         henBtn.classList.add('disabled');
         basketMsg.innerText = `⏰ Time's up! You collected ${currentScore} eggs.`;
 
-        // Show review panel and play again button
         startBtn.style.display = 'none';
+        rewardAdRow.classList.add('hidden');
         playAgainContainer.classList.remove('hidden');
         reviewPanel.classList.remove('hidden');
         finalScoreInfo.innerText = `🎉 Final score: ${currentScore} eggs! Share your review.`;
 
-        // reset review submission state
         reviewSubmitted = false;
         selectedRating = 0;
         highlightStars(0);
@@ -514,24 +611,24 @@
         submitReviewBtn.style.opacity = '1';
         document.querySelectorAll('.star').forEach(star => star.style.pointerEvents = 'auto');
         reviewComment.disabled = false;
-        tg.HapticFeedback?.notificationOccurred('warning');
+        tg.HapticFeedback?.notificationOccurred?.('warning');
 
-        // ---------- AD HOOK: show ad after game ends (reward moment) ----------
-        if (typeof window.showAdexora === 'function') {
-            window.showAdexora()
-                .then(() => {
-                    console.log('Ad shown after game end.');
-                })
-                .catch(e => {
-                    console.warn('Post-game ad error:', e);
-                });
-        }
+        // ---------- 3) Post-game ad → grant a small bonus on success ----------
+        const sessionAtEnd = gameSession;
+        showAdexoraAd()
+            .then(() => {
+                console.log('Ad shown after game end.');
+                applyBonusEggs(3, sessionAtEnd); // 🎁 +3 bonus eggs
+            })
+            .catch((e) => console.warn('Post-game ad error:', e));
     }
 
     // Start new game
     function startNewGame() {
         if (timerInterval) clearInterval(timerInterval);
         if (comboTimer) clearTimeout(comboTimer);
+        gameSession++;
+
         gameActive = true;
         currentScore = 0;
         currentCombo = 0;
@@ -542,14 +639,17 @@
         startBtn.style.display = 'none';
         playAgainContainer.classList.add('hidden');
         reviewPanel.classList.add('hidden');
+        rewardAdRow.classList.remove('hidden');   // show rewarded-ad button
         startTimer();
-        tg.HapticFeedback?.impactOccurred('heavy');
+        tg.HapticFeedback?.impactOccurred?.('heavy');
     }
 
     // Full reset (idle state)
     function fullReset() {
         if (timerInterval) clearInterval(timerInterval);
         if (comboTimer) clearTimeout(comboTimer);
+        gameSession++;
+
         gameActive = false;
         currentScore = 0;
         currentCombo = 0;
@@ -558,9 +658,10 @@
         henBtn.classList.add('disabled');
         basketMsg.innerText = "🌾 Press START to begin farming";
         startBtn.style.display = 'block';
+        rewardAdRow.classList.add('hidden');
         playAgainContainer.classList.add('hidden');
         reviewPanel.classList.add('hidden');
-        // reset review flags
+
         reviewSubmitted = false;
         selectedRating = 0;
         highlightStars(0);
@@ -591,7 +692,7 @@
         const val = parseInt(e.currentTarget.getAttribute('data-value'));
         selectedRating = val;
         highlightStars(val);
-        tg.HapticFeedback?.selectionChanged();
+        tg.HapticFeedback?.selectionChanged?.();
     }
 
     function bindStars() {
@@ -610,9 +711,10 @@
         }
         if (selectedRating === 0) {
             reviewFeedback.innerText = "⭐ Please select a star rating before submitting!";
-            tg.HapticFeedback?.notificationOccurred('error');
+            tg.HapticFeedback?.notificationOccurred?.('error');
             return;
         }
+
         const comment = reviewComment.value.trim();
         const payload = {
             action: "adsonar_hen_right_scoreboard",
@@ -623,25 +725,25 @@
             timestamp: Date.now(),
             user_id: tg.initDataUnsafe?.user?.id || "anonymous"
         };
-        tg.sendData(JSON.stringify(payload));
+
+        try {
+            tg.sendData?.(JSON.stringify(payload));
+        } catch (e) {
+            console.warn('sendData error:', e);
+        }
+
         reviewFeedback.innerHTML = `✅ Thank you! ${selectedRating}⭐ submitted to Adsonar.`;
         reviewSubmitted = true;
         submitReviewBtn.disabled = true;
         submitReviewBtn.style.opacity = '0.6';
         document.querySelectorAll('.star').forEach(star => star.style.pointerEvents = 'none');
         reviewComment.disabled = true;
-        tg.HapticFeedback?.notificationOccurred('success');
+        tg.HapticFeedback?.notificationOccurred?.('success');
 
-        // ---------- AD HOOK: also show ad after review (extra engagement) ----------
-        if (typeof window.showAdexora === 'function') {
-            window.showAdexora()
-                .then(() => {
-                    console.log('Ad shown after review submission.');
-                })
-                .catch(e => {
-                    console.warn('Post-review ad error:', e);
-                });
-        }
+        // ---------- 4) Post-review ad (extra engagement) ----------
+        showAdexoraAd()
+            .then(() => console.log('Ad shown after review submission.'))
+            .catch((e) => console.warn('Post-review ad error:', e));
     }
 
     // Event listeners
@@ -649,7 +751,7 @@
     henBtn.addEventListener('touchstart', (e) => {
         e.preventDefault();
         layEgg(e);
-    });
+    }, { passive: false });
 
     startBtn.addEventListener('click', () => {
         fullReset();
@@ -657,19 +759,19 @@
     });
     resetBtn.addEventListener('click', () => {
         fullReset();
-        tg.HapticFeedback?.impactOccurred('light');
+        tg.HapticFeedback?.impactOccurred?.('light');
     });
     playAgainBtn.addEventListener('click', () => {
         fullReset();
         startNewGame();
-        tg.HapticFeedback?.impactOccurred('medium');
+        tg.HapticFeedback?.impactOccurred?.('medium');
     });
     submitReviewBtn.addEventListener('click', submitReview);
 
     // initial state
     fullReset();
     bindStars();
-    console.log("Adsonar Hen Game — Right scoreboard pattern active with Adexora ads");
+    console.log(`Adsonar Hen Game — Right scoreboard active · Adexora app id ${ADEXORA_APP_ID}`);
 </script>
 </body>
-</html>
+</html>                                                                
