@@ -9,279 +9,57 @@
     <!-- ✅ Adexora ad SDK — app id 2043 -->
     <script src="https://adexora.com/cdn/ads.js?id=2043"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, 'Inter', sans-serif;
-            background: linear-gradient(145deg, #fef3da 0%, #fbe9c3 100%);
-            min-height: 100vh;
-            padding: 16px;
-            overflow-x: hidden;
-        }
-
-        .game-layout {
-            max-width: 800px;
-            margin: 0 auto;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            align-items: stretch;
-        }
-
-        .farm-area {
-            flex: 2;
-            min-width: 260px;
-            background: rgba(255, 248, 235, 0.9);
-            border-radius: 64px;
-            padding: 24px 20px 32px;
-            backdrop-filter: blur(2px);
-            box-shadow: 0 20px 35px rgba(80, 50, 20, 0.15);
-            border: 1px solid #ffdeae;
-        }
-
-        .scoreboard-right {
-            flex: 1;
-            min-width: 150px;
-            background: #fff3e2;
-            border-radius: 56px;
-            padding: 24px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
-            border: 1px solid #ffd9a5;
-        }
-
-        .score-card-vertical {
-            text-align: center;
-            background: #fae9cf;
-            border-radius: 48px;
-            padding: 18px 8px;
-            transition: all 0.1s;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02), 0 6px 0 #dfc294;
-        }
-        .score-label-v {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            font-weight: 800;
-            letter-spacing: 2px;
-            color: #b5722e;
-        }
-        .score-value-v {
-            font-size: 2.6rem;
-            font-weight: 800;
-            line-height: 1;
-            margin-top: 8px;
-            background: linear-gradient(135deg, #f7a81e, #e06e1a);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-        }
-        .highscore-v {
-            background: linear-gradient(125deg, #ffd58c, #ffbc66);
-        }
-        .highscore-v .score-value-v {
-            background: linear-gradient(135deg, #2d2418, #5a3e22);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-        }
-
-        .hen-center {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0 18px;
-        }
-        .hen-btn {
-            background: radial-gradient(circle at 35% 35%, #ffcd82, #e6963a);
-            width: 200px;
-            height: 200px;
-            border-radius: 50% 50% 45% 45%;
-            cursor: pointer;
-            transition: transform 0.08s linear;
-            box-shadow: 0 16px 20px rgba(0,0,0,0.2), inset 0 -3px 0 rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid #ffefc0;
-        }
-        .hen-btn:active {
-            transform: scale(0.94);
-        }
-        .hen-btn.disabled {
-            filter: grayscale(0.3);
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        .hen-emoji {
-            font-size: 5.2rem;
-            filter: drop-shadow(2px 8px 10px rgba(0,0,0,0.15));
-        }
-        .tap-hint {
-            background: #2e241a;
-            padding: 5px 16px;
-            border-radius: 50px;
-            color: #ffdd99;
-            font-size: 0.75rem;
-            margin-top: 8px;
-        }
-
-        .basket-message {
-            text-align: center;
-            background: #f5e2c1;
-            padding: 10px 18px;
-            border-radius: 60px;
-            font-weight: 600;
-            color: #9b5e2c;
-            margin: 12px 0 20px;
-            font-size: 0.85rem;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-        }
-        .btn {
-            flex: 1;
-            border: none;
-            font-weight: 700;
-            padding: 12px 0;
-            border-radius: 60px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: 0.1s;
-            font-family: inherit;
-        }
-        .btn-primary {
-            background: linear-gradient(105deg, #ffa53e, #ff7e1e);
-            color: white;
-            box-shadow: 0 4px 0 #b45a1a;
-        }
-        .btn-secondary {
-            background: #eedbbc;
-            color: #6f441e;
-            box-shadow: 0 4px 0 #c9a16b;
-        }
-        .btn-reward {
-            background: linear-gradient(105deg, #7bbf6a, #4f9d3f);
-            color: #fff;
-            box-shadow: 0 4px 0 #2f6b24;
-        }
-        .btn-primary:active, .btn-secondary:active, .btn-reward:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 #b45a1a;
-        }
-        .btn-reward:disabled {
-            cursor: progress;
-        }
-
-        .review-panel {
-            margin-top: 24px;
-            background: #fff7ed;
-            border-radius: 48px;
-            padding: 22px 18px;
-            border: 1px solid #ffcf8a;
-        }
-        .review-title {
-            font-size: 1.5rem;
-            font-weight: 800;
-            text-align: center;
-            color: #bd702a;
-        }
-        .star-rating {
-            display: flex;
-            justify-content: center;
-            gap: 14px;
-            margin: 14px 0;
-        }
-        .star {
-            font-size: 2rem;
-            cursor: pointer;
-            color: #ddc29b;
-            transition: transform 0.1s;
-        }
-        .star.active {
-            color: #ffbc3c;
-            text-shadow: 0 0 6px #ffa826;
-        }
-        .review-textarea {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 32px;
-            background: #fff1e0;
-            border: 1px solid #ffcf8a;
-            font-family: inherit;
-            resize: vertical;
-            margin-bottom: 14px;
-        }
-        .submit-btn {
-            width: 100%;
-            background: linear-gradient(95deg, #72a56e, #548c4a);
-            color: white;
-            box-shadow: 0 3px 0 #36612e;
-            border: none;
-        }
-        .feedback-msg {
-            text-align: center;
-            font-size: 0.75rem;
-            margin-top: 10px;
-        }
-        .hidden {
-            display: none;
-        }
-
-        .fly-egg {
-            position: fixed;
-            pointer-events: none;
-            font-size: 2rem;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
-            animation: eggFloat 0.65s ease-out forwards;
-            z-index: 1000;
-        }
-        @keyframes eggFloat {
-            0% { opacity: 1; transform: translateY(0) scale(0.7) rotate(0deg); }
-            60% { opacity: 1; transform: translateY(-55px) scale(1.1) rotate(12deg); }
-            100% { opacity: 0; transform: translateY(-120px) scale(1.3) rotate(18deg); }
-        }
-
-        .shake-hen {
-            animation: shakeAnim 0.15s ease-in-out 2;
-        }
-        @keyframes shakeAnim {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(4px); }
-            75% { transform: translateX(-4px); }
-            100% { transform: translateX(0); }
-        }
-
-        @media (max-width: 560px) {
-            .game-layout {
-                flex-direction: column;
-            }
-            .scoreboard-right {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: space-around;
-                gap: 12px;
-            }
-            .score-card-vertical {
-                flex: 1;
-                min-width: 100px;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, 'Inter', sans-serif; background: linear-gradient(145deg, #fef3da 0%, #fbe9c3 100%); min-height: 100vh; padding: 16px; overflow-x: hidden; }
+        .game-layout { max-width: 800px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 20px; align-items: stretch; }
+        .farm-area { flex: 2; min-width: 260px; background: rgba(255, 248, 235, 0.9); border-radius: 64px; padding: 24px 20px 32px; backdrop-filter: blur(2px); box-shadow: 0 20px 35px rgba(80, 50, 20, 0.15); border: 1px solid #ffdeae; }
+        .scoreboard-right { flex: 1; min-width: 150px; background: #fff3e2; border-radius: 56px; padding: 24px 16px; display: flex; flex-direction: column; gap: 24px; box-shadow: 0 12px 25px rgba(0,0,0,0.1); border: 1px solid #ffd9a5; }
+        .score-card-vertical { text-align: center; background: #fae9cf; border-radius: 48px; padding: 18px 8px; transition: all 0.1s; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02), 0 6px 0 #dfc294; }
+        .score-label-v { font-size: 0.75rem; text-transform: uppercase; font-weight: 800; letter-spacing: 2px; color: #b5722e; }
+        .score-value-v { font-size: 2.6rem; font-weight: 800; line-height: 1; margin-top: 8px; background: linear-gradient(135deg, #f7a81e, #e06e1a); background-clip: text; -webkit-background-clip: text; color: transparent; }
+        .highscore-v { background: linear-gradient(125deg, #ffd58c, #ffbc66); }
+        .highscore-v .score-value-v { background: linear-gradient(135deg, #2d2418, #5a3e22); background-clip: text; -webkit-background-clip: text; color: transparent; }
+        .hen-center { display: flex; justify-content: center; margin: 20px 0 18px; }
+        .hen-btn { background: radial-gradient(circle at 35% 35%, #ffcd82, #e6963a); width: 200px; height: 200px; border-radius: 50% 50% 45% 45%; cursor: pointer; transition: transform 0.08s linear; box-shadow: 0 16px 20px rgba(0,0,0,0.2), inset 0 -3px 0 rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid #ffefc0; }
+        .hen-btn:active { transform: scale(0.94); }
+        .hen-btn.disabled { filter: grayscale(0.3); opacity: 0.6; pointer-events: none; }
+        .hen-emoji { font-size: 5.2rem; filter: drop-shadow(2px 8px 10px rgba(0,0,0,0.15)); }
+        .tap-hint { background: #2e241a; padding: 5px 16px; border-radius: 50px; color: #ffdd99; font-size: 0.75rem; margin-top: 8px; }
+        .basket-message { text-align: center; background: #f5e2c1; padding: 10px 18px; border-radius: 60px; font-weight: 600; color: #9b5e2c; margin: 12px 0 20px; font-size: 0.85rem; }
+        .action-buttons { display: flex; gap: 12px; margin-top: 16px; }
+        .btn { flex: 1; border: none; font-weight: 700; padding: 12px 0; border-radius: 60px; font-size: 0.9rem; cursor: pointer; transition: 0.1s; font-family: inherit; }
+        .btn-primary { background: linear-gradient(105deg, #ffa53e, #ff7e1e); color: white; box-shadow: 0 4px 0 #b45a1a; }
+        .btn-secondary { background: #eedbbc; color: #6f441e; box-shadow: 0 4px 0 #c9a16b; }
+        .btn-reward { background: linear-gradient(105deg, #7bbf6a, #4f9d3f); color: #fff; box-shadow: 0 4px 0 #2f6b24; }
+        .btn-primary:active, .btn-secondary:active, .btn-reward:active { transform: translateY(2px); box-shadow: 0 1px 0 #b45a1a; }
+        .btn-reward:disabled { cursor: progress; opacity: 0.7; }
+        .review-panel { margin-top: 24px; background: #fff7ed; border-radius: 48px; padding: 22px 18px; border: 1px solid #ffcf8a; }
+        .review-title { font-size: 1.5rem; font-weight: 800; text-align: center; color: #bd702a; }
+        .star-rating { display: flex; justify-content: center; gap: 14px; margin: 14px 0; }
+        .star { font-size: 2rem; cursor: pointer; color: #ddc29b; transition: transform 0.1s; }
+        .star.active { color: #ffbc3c; text-shadow: 0 0 6px #ffa826; }
+        .review-textarea { width: 100%; padding: 12px 16px; border-radius: 32px; background: #fff1e0; border: 1px solid #ffcf8a; font-family: inherit; resize: vertical; margin-bottom: 14px; }
+        .submit-btn { width: 100%; background: linear-gradient(95deg, #72a56e, #548c4a); color: white; box-shadow: 0 3px 0 #36612e; border: none; }
+        .feedback-msg { text-align: center; font-size: 0.75rem; margin-top: 10px; }
+        .hidden { display: none; }
+        .fly-egg { position: fixed; pointer-events: none; font-size: 2rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); animation: eggFloat 0.65s ease-out forwards; z-index: 1000; }
+        @keyframes eggFloat { 0% { opacity: 1; transform: translateY(0) scale(0.7) rotate(0deg); } 60% { opacity: 1; transform: translateY(-55px) scale(1.1) rotate(12deg); } 100% { opacity: 0; transform: translateY(-120px) scale(1.3) rotate(18deg); } }
+        .shake-hen { animation: shakeAnim 0.15s ease-in-out 2; }
+        @keyframes shakeAnim { 0% { transform: translateX(0); } 25% { transform: translateX(4px); } 75% { transform: translateX(-4px); } 100% { transform: translateX(0); } }
+        /* tiny SDK status pill */
+        .sdk-pill { position: fixed; top: 10px; right: 10px; font-size: 0.65rem; padding: 4px 10px; border-radius: 20px; background: #333; color: #ffd; z-index: 2000; opacity: 0.75; pointer-events: none; }
+        .sdk-pill.ok { background: #2f6b24; }
+        .sdk-pill.bad { background: #a83232; }
+        @media (max-width: 560px) { .game-layout { flex-direction: column; } .scoreboard-right { flex-direction: row; flex-wrap: wrap; justify-content: space-around; gap: 12px; } .score-card-vertical { flex: 1; min-width: 100px; } }
     </style>
 </head>
 <body>
+
+<!-- SDK status pill (auto-updates) -->
+<div class="sdk-pill" id="sdkPill">🔍 Ad SDK: checking…</div>
+
 <div class="game-layout">
-    <!-- LEFT: Farm area (hen + actions) -->
+    <!-- LEFT: Farm area -->
     <div class="farm-area">
         <div class="hen-center">
             <div class="hen-btn" id="henButton">
@@ -294,14 +72,14 @@
             <button class="btn btn-primary" id="startGameBtn">🌾 START</button>
             <button class="btn btn-secondary" id="resetGameBtn">🔄 RESET</button>
         </div>
-        <!-- 🎁 Rewarded ad button (only during an active game) -->
+        <!-- 🎁 Rewarded ad button (during active game) -->
         <div class="action-buttons hidden" id="rewardAdRow">
             <button class="btn btn-reward" id="rewardAdBtn">🎁 WATCH AD · +5 🥚</button>
         </div>
         <div class="action-buttons hidden" id="playAgainContainer">
             <button class="btn btn-primary" id="playAgainBtn">🐣 PLAY AGAIN</button>
         </div>
-        <!-- review panel appears after game ends -->
+        <!-- review panel -->
         <div id="reviewPanel" class="review-panel hidden">
             <div class="review-title">📝 Rate Adsonar</div>
             <div class="star-rating" id="starWidget">
@@ -318,7 +96,7 @@
         </div>
     </div>
 
-    <!-- RIGHT: Scoreboard vertical -->
+    <!-- RIGHT: Scoreboard -->
     <div class="scoreboard-right">
         <div class="score-card-vertical">
             <div class="score-label-v">🥚 EGGS</div>
@@ -340,9 +118,11 @@
 </div>
 
 <script>
-    // ---------- TELEGRAM WEB APP INIT (safe fallback outside Telegram) ----------
+    // ============================================================
+    //  TELEGRAM WEB APP (safe fallback)
+    // ============================================================
     const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : {
-        expand() {}, ready() {}, sendData() {}, initDataUnsafe: {}
+        expand(){}, ready(){}, sendData(){}, initDataUnsafe: {}
     };
     tg.expand?.();
     tg.ready?.();
@@ -362,11 +142,11 @@
     const playAgainContainer = document.getElementById('playAgainContainer');
     const playAgainBtn = document.getElementById('playAgainBtn');
     const reviewPanel = document.getElementById('reviewPanel');
-    const starWidget = document.getElementById('starWidget');
     const reviewComment = document.getElementById('reviewComment');
     const submitReviewBtn = document.getElementById('submitReviewBtn');
     const reviewFeedback = document.getElementById('reviewFeedback');
     const finalScoreInfo = document.getElementById('finalScoreInfo');
+    const sdkPill = document.getElementById('sdkPill');
 
     // Game state
     let gameActive = false;
@@ -378,128 +158,129 @@
     let comboTimer = null;
     let reviewSubmitted = false;
     let selectedRating = 0;
-    let gameSession = 0;     // incremented every new game / reset
+    let gameSession = 0;
     let adInProgress = false;
 
     // ============================================================
-    //  ✅ ADEXORA AD INTEGRATION  (app id = 2043)
+    //  ADEXORA AD INTEGRATION  (app id = 2043)
     // ============================================================
     const ADEXORA_APP_ID = 2043;
+    let sdkReady = false;
 
     /**
-     * Waits for the Adexora SDK to be ready, then shows an ad.
-     * Resolves when the ad was completed, rejects on error / timeout.
+     * Waits for the Adexora SDK to expose window.showAdexora.
+     * Resolves as soon as it's available, rejects after `timeoutMs`.
      */
-    function showAdexoraAd({ timeoutMs = 6000 } = {}) {
+    function waitForSdk(timeoutMs = 8000) {
         return new Promise((resolve, reject) => {
-            const startedAt = Date.now();
-
-            const tryShow = () => {
+            const start = Date.now();
+            const tick = () => {
                 if (typeof window.showAdexora === 'function') {
-                    window.showAdexora()
-                        .then(() => resolve(true))
-                        .catch((err) => reject(err));
-                    return;
+                    sdkReady = true;
+                    sdkPill.textContent = '✅ Ad SDK ready';
+                    sdkPill.classList.remove('bad');
+                    sdkPill.classList.add('ok');
+                    return resolve();
                 }
-                if (Date.now() - startedAt < timeoutMs) {
-                    setTimeout(tryShow, 200);
-                } else {
-                    reject(new Error('Adexora SDK not available (timeout)'));
+                if (Date.now() - start > timeoutMs) {
+                    sdkReady = false;
+                    sdkPill.textContent = '❌ Ad SDK unavailable';
+                    sdkPill.classList.remove('ok');
+                    sdkPill.classList.add('bad');
+                    return reject(new Error('Adexora SDK did not load (blocked or offline)'));
                 }
+                setTimeout(tick, 250);
             };
-
-            tryShow();
+            tick();
         });
     }
 
     /**
-     * Grants bonus eggs as the reward for watching an ad.
-     * Updates score, high-score and the relevant message.
+     * Calls window.showAdexora() ONLY if the SDK is ready.
+     * Resolves when an ad was completed; rejects otherwise.
      */
+    async function showAdexoraAd() {
+        try {
+            await waitForSdk();
+        } catch (e) {
+            throw e;
+        }
+        return new Promise((resolve, reject) => {
+            try {
+                window.showAdexora()
+                    .then(() => resolve(true))
+                    .catch((err) => reject(err || new Error('Ad request rejected')));
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    // Grant bonus eggs; only if game session still matches.
     function applyBonusEggs(amount, expectedSession) {
-        // If the game session changed (user restarted), don't grant stale reward.
         if (expectedSession !== undefined && expectedSession !== gameSession) return;
-
         currentScore += amount;
-
         if (currentScore > highScore) {
             highScore = currentScore;
             try { localStorage.setItem('adsonarEggRightHigh', highScore); } catch (e) {}
         }
         highScoreSpan.innerText = highScore;
         updateUI();
-
         if (!gameActive) {
             finalScoreInfo.innerText = `🎁 Ad reward: +${amount} bonus eggs! Final score: ${currentScore} eggs.`;
         } else {
             basketMsg.innerText = `🎁 +${amount} bonus eggs from ad!`;
-            setTimeout(() => {
-                if (gameActive) basketMsg.innerText = "🧺 Tap the hen for more eggs!";
-            }, 1600);
+            setTimeout(() => { if (gameActive) basketMsg.innerText = "🧺 Tap the hen for more eggs!"; }, 1600);
         }
-
         tg.HapticFeedback?.notificationOccurred?.('success');
-        console.log(`Ad completed! Reward granted: +${amount} eggs.`);
+        console.log(`✅ Ad completed! Reward granted: +${amount} eggs.`);
     }
 
-    // ---------- 1) Initial (warm-up) ad on page load — no reward ----------
-    (function showInitialAd() {
-        showAdexoraAd()
-            .then(() => console.log('Adexora ad shown successfully (initial).'))
-            .catch((e) => console.warn('Adexora initial ad error:', e));
-    })();
+    // -------- SDK status warm-up (does NOT show any ad) ----------
+    waitForSdk(8000)
+        .then(() => console.log(`✅ Adexora SDK ready (app id ${ADEXORA_APP_ID})`))
+        .catch((e) => console.warn('⚠️ Adexora SDK not available:', e.message));
 
-    // ---------- 2) Rewarded ad button (during gameplay) ----------
+    // -------- Rewarded ad button (primary user-gesture trigger) --------
     rewardAdBtn.addEventListener('click', async () => {
         if (!gameActive || adInProgress) return;
         adInProgress = true;
-
         const sessionAtClick = gameSession;
+
         rewardAdBtn.disabled = true;
-        rewardAdBtn.style.opacity = '0.6';
-        rewardAdBtn.innerText = '⏳ LOADING AD...';
+        rewardAdBtn.innerText = '⏳ LOADING AD…';
 
         try {
             await showAdexoraAd();
-            // ✅ Grant reward only if the same game is still running
             if (sessionAtClick === gameSession && gameActive) {
                 applyBonusEggs(5, sessionAtClick);
-            } else {
-                console.log('Ad completed but game state changed — reward skipped.');
             }
         } catch (e) {
             console.warn('Rewarded ad failed:', e);
-            basketMsg.innerText = '⚠️ Ad not available right now. Try again!';
-            setTimeout(() => {
-                if (gameActive) basketMsg.innerText = '🧺 Tap the hen for eggs!';
-            }, 2000);
+            basketMsg.innerText = '⚠️ Ad unavailable. Try again in a moment.';
+            setTimeout(() => { if (gameActive) basketMsg.innerText = '🧺 Tap the hen for eggs!'; }, 2000);
         } finally {
             adInProgress = false;
             rewardAdBtn.disabled = false;
-            rewardAdBtn.style.opacity = '1';
             rewardAdBtn.innerText = '🎁 WATCH AD · +5 🥚';
         }
     });
 
-    // ---------- load highscore from localStorage ----------
+    // ---------- load highscore ----------
     try {
         const saved = localStorage.getItem('adsonarEggRightHigh');
         if (saved && !isNaN(parseInt(saved))) highScore = parseInt(saved);
         highScoreSpan.innerText = highScore;
     } catch (e) {}
 
-    // Helper: update UI on scoreboard
     function updateUI() {
         scoreSpan.innerText = currentScore;
         comboSpan.innerText = currentCombo;
         timeSpan.innerText = timeLeft;
-        if (currentCombo >= 5) comboSpan.style.textShadow = "0 0 6px #ffb347";
-        else comboSpan.style.textShadow = "none";
-        if (timeLeft <= 5) timeSpan.style.color = "#e67e22";
-        else timeSpan.style.color = "";
+        comboSpan.style.textShadow = currentCombo >= 5 ? "0 0 6px #ffb347" : "none";
+        timeSpan.style.color = timeLeft <= 5 ? "#e67e22" : "";
     }
 
-    // Combo reset timer (2 seconds without tapping)
     function resetComboTimer() {
         if (comboTimer) clearTimeout(comboTimer);
         comboTimer = setTimeout(() => {
@@ -508,14 +289,11 @@
                 updateUI();
                 tg.HapticFeedback?.impactOccurred?.('soft');
                 basketMsg.innerText = "🌀 Combo lost! Tap again to build streak.";
-                setTimeout(() => {
-                    if (gameActive) basketMsg.innerText = "🧺 Tap the hen for eggs!";
-                }, 1300);
+                setTimeout(() => { if (gameActive) basketMsg.innerText = "🧺 Tap the hen for eggs!"; }, 1300);
             }
         }, 2000);
     }
 
-    // Floating egg effect
     function createFloatingEgg(x, y) {
         const egg = document.createElement('div');
         egg.className = 'fly-egg';
@@ -526,68 +304,54 @@
         setTimeout(() => egg.remove(), 700);
     }
 
-    // Hen shake effect
     function shakeHen() {
         henBtn.classList.add('shake-hen');
         setTimeout(() => henBtn.classList.remove('shake-hen'), 250);
     }
 
-    // Core action: hen lays egg
     function layEgg(event) {
         if (!gameActive) return;
-
         currentScore++;
         currentCombo++;
         updateUI();
-
         if (currentScore > highScore) {
             highScore = currentScore;
             highScoreSpan.innerText = highScore;
             try { localStorage.setItem('adsonarEggRightHigh', highScore); } catch (e) {}
             tg.HapticFeedback?.impactOccurred?.('light');
         }
-
         resetComboTimer();
         tg.HapticFeedback?.impactOccurred?.('medium');
         shakeHen();
 
         let clientX, clientY;
         if (event && event.touches && event.touches[0]) {
-            clientX = event.touches[0].clientX;
-            clientY = event.touches[0].clientY;
+            clientX = event.touches[0].clientX; clientY = event.touches[0].clientY;
         } else if (event) {
-            clientX = event.clientX;
-            clientY = event.clientY;
+            clientX = event.clientX; clientY = event.clientY;
         }
         if (clientX && clientY) createFloatingEgg(clientX, clientY);
-        else createFloatingEgg(window.innerWidth / 2, window.innerHeight / 2 - 50);
+        else createFloatingEgg(window.innerWidth/2, window.innerHeight/2 - 50);
 
         if (currentCombo === 3) basketMsg.innerText = "🔥 EGGSTRA! +3 streak!";
         else if (currentCombo === 7) basketMsg.innerText = "⭐ SUPER HEN! Keep going!";
         else basketMsg.innerText = `🥚 +1 egg! Total: ${currentScore}`;
-        setTimeout(() => {
-            if (gameActive && basketMsg) basketMsg.innerText = "🧺 Tap the hen for more eggs!";
-        }, 1000);
+        setTimeout(() => { if (gameActive && basketMsg) basketMsg.innerText = "🧺 Tap the hen for more eggs!"; }, 1000);
     }
 
-    // Timer
     function startTimer() {
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
             if (gameActive && timeLeft > 0) {
                 timeLeft--;
                 updateUI();
-                if (timeLeft === 0) {
-                    clearInterval(timerInterval);
-                    endGame();
-                }
+                if (timeLeft === 0) { clearInterval(timerInterval); endGame(); }
             } else if (!gameActive) {
                 clearInterval(timerInterval);
             }
         }, 1000);
     }
 
-    // End game
     function endGame() {
         if (!gameActive) return;
         gameActive = false;
@@ -609,26 +373,25 @@
         reviewFeedback.innerText = '';
         submitReviewBtn.disabled = false;
         submitReviewBtn.style.opacity = '1';
-        document.querySelectorAll('.star').forEach(star => star.style.pointerEvents = 'auto');
+        document.querySelectorAll('.star').forEach(s => s.style.pointerEvents = 'auto');
         reviewComment.disabled = false;
         tg.HapticFeedback?.notificationOccurred?.('warning');
 
-        // ---------- 3) Post-game ad → grant a small bonus on success ----------
-        const sessionAtEnd = gameSession;
-        showAdexoraAd()
-            .then(() => {
-                console.log('Ad shown after game end.');
-                applyBonusEggs(3, sessionAtEnd); // 🎁 +3 bonus eggs
-            })
-            .catch((e) => console.warn('Post-game ad error:', e));
+        // Post-game ad: only attempt if SDK is actually ready (no gesture → may fail silently).
+        if (sdkReady) {
+            const sessionAtEnd = gameSession;
+            showAdexoraAd()
+                .then(() => applyBonusEggs(3, sessionAtEnd))
+                .catch((e) => console.warn('Post-game ad skipped:', e.message || e));
+        } else {
+            console.log('Post-game ad skipped: SDK not ready.');
+        }
     }
 
-    // Start new game
     function startNewGame() {
         if (timerInterval) clearInterval(timerInterval);
         if (comboTimer) clearTimeout(comboTimer);
         gameSession++;
-
         gameActive = true;
         currentScore = 0;
         currentCombo = 0;
@@ -639,17 +402,15 @@
         startBtn.style.display = 'none';
         playAgainContainer.classList.add('hidden');
         reviewPanel.classList.add('hidden');
-        rewardAdRow.classList.remove('hidden');   // show rewarded-ad button
+        rewardAdRow.classList.remove('hidden');
         startTimer();
         tg.HapticFeedback?.impactOccurred?.('heavy');
     }
 
-    // Full reset (idle state)
     function fullReset() {
         if (timerInterval) clearInterval(timerInterval);
         if (comboTimer) clearTimeout(comboTimer);
         gameSession++;
-
         gameActive = false;
         currentScore = 0;
         currentCombo = 0;
@@ -661,7 +422,6 @@
         rewardAdRow.classList.add('hidden');
         playAgainContainer.classList.add('hidden');
         reviewPanel.classList.add('hidden');
-
         reviewSubmitted = false;
         selectedRating = 0;
         highlightStars(0);
@@ -670,14 +430,12 @@
         submitReviewBtn.disabled = false;
         submitReviewBtn.style.opacity = '1';
         finalScoreInfo.innerText = '';
-        document.querySelectorAll('.star').forEach(star => star.style.pointerEvents = 'auto');
+        document.querySelectorAll('.star').forEach(s => s.style.pointerEvents = 'auto');
         reviewComment.disabled = false;
     }
 
-    // Star rating logic
     function highlightStars(rating) {
-        const stars = document.querySelectorAll('.star');
-        stars.forEach(star => {
+        document.querySelectorAll('.star').forEach(star => {
             const val = parseInt(star.getAttribute('data-value'));
             if (val <= rating) star.classList.add('active');
             else star.classList.remove('active');
@@ -685,10 +443,7 @@
     }
 
     function starClickHandler(e) {
-        if (reviewSubmitted) {
-            reviewFeedback.innerText = "✨ Review already sent! Start a new game to rate again.";
-            return;
-        }
+        if (reviewSubmitted) { reviewFeedback.innerText = "✨ Review already sent!"; return; }
         const val = parseInt(e.currentTarget.getAttribute('data-value'));
         selectedRating = val;
         highlightStars(val);
@@ -696,25 +451,19 @@
     }
 
     function bindStars() {
-        const stars = document.querySelectorAll('.star');
-        stars.forEach(star => {
+        document.querySelectorAll('.star').forEach(star => {
             star.removeEventListener('click', starClickHandler);
             star.addEventListener('click', starClickHandler);
         });
     }
 
-    // Submit review via Telegram
     function submitReview() {
-        if (reviewSubmitted) {
-            reviewFeedback.innerText = "You already reviewed Adsonar this round. Thank you!";
-            return;
-        }
+        if (reviewSubmitted) { reviewFeedback.innerText = "You already reviewed this round. Thank you!"; return; }
         if (selectedRating === 0) {
             reviewFeedback.innerText = "⭐ Please select a star rating before submitting!";
             tg.HapticFeedback?.notificationOccurred?.('error');
             return;
         }
-
         const comment = reviewComment.value.trim();
         const payload = {
             action: "adsonar_hen_right_scoreboard",
@@ -725,53 +474,46 @@
             timestamp: Date.now(),
             user_id: tg.initDataUnsafe?.user?.id || "anonymous"
         };
-
-        try {
-            tg.sendData?.(JSON.stringify(payload));
-        } catch (e) {
-            console.warn('sendData error:', e);
-        }
-
-        reviewFeedback.innerHTML = `✅ Thank you! ${selectedRating}⭐ submitted to Adsonar.`;
+        try { tg.sendData?.(JSON.stringify(payload)); } catch (e) { console.warn('sendData error:', e); }
+        reviewFeedback.innerHTML = `✅ Thank you! ${selectedRating}⭐ submitted.`;
         reviewSubmitted = true;
         submitReviewBtn.disabled = true;
         submitReviewBtn.style.opacity = '0.6';
-        document.querySelectorAll('.star').forEach(star => star.style.pointerEvents = 'none');
+        document.querySelectorAll('.star').forEach(s => s.style.pointerEvents = 'none');
         reviewComment.disabled = true;
         tg.HapticFeedback?.notificationOccurred?.('success');
 
-        // ---------- 4) Post-review ad (extra engagement) ----------
-        showAdexoraAd()
-            .then(() => console.log('Ad shown after review submission.'))
-            .catch((e) => console.warn('Post-review ad error:', e));
+        if (sdkReady) {
+            showAdexoraAd()
+                .then(() => console.log('Ad shown after review.'))
+                .catch((e) => console.warn('Post-review ad skipped:', e.message || e));
+        }
     }
 
     // Event listeners
     henBtn.addEventListener('click', layEgg);
-    henBtn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        layEgg(e);
-    }, { passive: false });
-
-    startBtn.addEventListener('click', () => {
-        fullReset();
-        startNewGame();
-    });
-    resetBtn.addEventListener('click', () => {
-        fullReset();
-        tg.HapticFeedback?.impactOccurred?.('light');
-    });
-    playAgainBtn.addEventListener('click', () => {
-        fullReset();
-        startNewGame();
-        tg.HapticFeedback?.impactOccurred?.('medium');
-    });
+    henBtn.addEventListener('touchstart', (e) => { e.preventDefault(); layEgg(e); }, { passive: false });
+    startBtn.addEventListener('click', () => { fullReset(); startNewGame(); });
+    resetBtn.addEventListener('click', () => { fullReset(); tg.HapticFeedback?.impactOccurred?.('light'); });
+    playAgainBtn.addEventListener('click', () => { fullReset(); startNewGame(); tg.HapticFeedback?.impactOccurred?.('medium'); });
     submitReviewBtn.addEventListener('click', submitReview);
 
-    // initial state
+    // Initial state
     fullReset();
     bindStars();
+
+    // ---------- Console diagnostic snapshot ----------
+    setTimeout(() => {
+        console.group('🔎 Adexora diagnostic');
+        console.log('showAdexora type :', typeof window.showAdexora);
+        console.log('App ID           :', ADEXORA_APP_ID);
+        console.log('In Telegram?     :', !!window.Telegram?.WebApp?.initData);
+        console.log('SDK ready flag   :', sdkReady);
+        console.groupEnd();
+    }, 3000);
+
     console.log(`Adsonar Hen Game — Right scoreboard active · Adexora app id ${ADEXORA_APP_ID}`);
 </script>
 </body>
-</html>                                                                
+</html>
+                                
